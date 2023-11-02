@@ -5,6 +5,7 @@
 ## 模型结构与其实现
 
 ### 概述
+![image](./images/image5.gif)
 
 Transformer模型起初用于NLP领域，是一种序列到序列模型。迁移到CV领域，起初是CNN与self attention相结合的模型，2021年google提出一种standard Transformer模型。
 
@@ -293,6 +294,7 @@ class VisionTransformer(nn.Module):
 $$
 197\times768 \rightarrow 197\times3012\rightarrow 197\times768
 $$
+![image](./images/model_overview.png)
 ### Google 源码
 
 google开源的Vi是基于flax神经网路库开发的，建立在jax上，可以进行优化的科学计算。
@@ -300,6 +302,18 @@ google开源的Vi是基于flax神经网路库开发的，建立在jax上，可�
 源码更加简洁，在源码的基础上增加一些注释。
 
 但是可以发现，google实现ViT时候，增加了一个resnet的可选形参。当选择使用残差网络块时，会先对输入进行标准卷积和Resnet，然后才使用patch embedding，position embedding和attention等操作。
+![image](./images/resnet_overview.png)
+
+这是ViT模型的变体，采用了类似于ResNetv2的BiT架构，不同点在于所有批量归一化层替代为组归一化，卷积层采用权重标准化，对于大批次的数据友好，此外这种方法还可用于迁移学习。
+
+### ViT模型变体简介
+
+ViT不依赖图片局部性和平移不变性（CNN所固有的）的先验条件，更关注图像的全局关系，在小批量数据集上可能效果没有ResNet好。因此研究者们考虑将CNN与Transformer相结合，google考虑将ResNet和ViT结合，将ResNet提取到的特征作为Token输入，提高局部特征建模能力。
+
+![image](./images/vit_variance.png)
+
+![image](./images/HVT.png)
+根据ViT变体的分类，该结构应该类似于Sequential Integration中的CoAtNet和BoTNet。其性能可能被bottleneck的设计和模型深度影响，但是通过增加残差结构，可以在纯ViT的基础上增强速度与效率，并且综合了CNN的局部相关性和Transformer的全局能力。
 
 ```python
 from typing import Any, Callable, Optional, Tuple, Type
@@ -596,9 +610,13 @@ class VisionTransformer(nn.Module):
 
 # Reference
 
+vision transformer
+
+[Transformers for Image Recognition at Scale – Google Research Blog](https://blog.research.google/2020/12/transformers-for-image-recognition-at.html)
+
 [【精选】Vision Transformer详解-CSDN博客](https://blog.csdn.net/qq_37541097/article/details/118242600)
 
-[[2010.11929\] An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (arxiv.org)
+[[2010.11929\] An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (arxiv.org)](https://arxiv.org/abs/2010.11929)
 
 [[arxiv.org/pdf/2108.08810.pdf](https://arxiv.org/pdf/2108.08810.pdf)](https://arxiv.org/abs/2010.11929)
 
@@ -611,3 +629,13 @@ https://www.youtube.com/watch?v=BZh1ltr5Rkg
 [vision_transformer/vit_jax/models_vit.py at main · google-research/vision_transformer (github.com)](https://github.com/google-research/vision_transformer/blob/main/vit_jax/models_vit.py#L217)
 
 [Vision Transformers (ViT) in Image Recognition: Full Guide - viso.ai](https://viso.ai/deep-learning/vision-transformer-vit/)
+
+[Applications of transformers in computer vision - Christian Garbin’s personal blog (cgarbin.github.io)](https://cgarbin.github.io/transformers-in-computer-vision/)
+
+variance
+
+[2305.09880.pdf (arxiv.org)](https://arxiv.org/ftp/arxiv/papers/2305/2305.09880.pdf)
+
+NLP中的transformer
+
+[The Annotated Transformer (harvard.edu)](http://nlp.seas.harvard.edu/annotated-transformer/)
