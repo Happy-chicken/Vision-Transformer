@@ -52,6 +52,7 @@ self.projection = nn.Sequential(
 ViT的输入大小与输出大小一致，为了最后进行类别的判别，vision transformer引入cls token，这是一个可以学习的参数，最后用一个全连接层进行分类预测。所以，模型的输入就从$batch\ size \times 196 \times 768 \to batch\ size \times 197 \times 768$ .
 
 position embedding （$batch\ size \times 197\times768$）也是一个可以学习的参数，位置越近，越具有相似的位置编码。因为ViT是基于attention机制的，所以在处理序列数据时会丢失位置信息，无法像CNN一样保留位置信息，position embedding使得ViT能够patch之间的位置关系与空间结构。但实验表明，位置编码对于最终的结果并没有太大的影响。一维位置编码相对于没有编码的准确率上升了3%，而其他方式的位置编码效果差异不大。
+
 ![image](./images/position_similarity.png)
 
 至此已经完成了patch embedding、class token和position embedding。
@@ -105,6 +106,7 @@ x^i\rightarrow a^i \rightarrow k^i    \\
 \ \ \ \ \ \ \ \ \ \ \ \searrow\\
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v^i \\
 $$
+
 ![image](./images/qk.png)
 
 q会匹配每一个k，进行softmax后得到一个分数，原则上只要attention可以获得一个分数就可以输出结果。
@@ -118,6 +120,7 @@ $$
 b^1=\sum\hat\alpha_{1,i}v^i
 $$
 实际操作中，会像如下所示进行矩阵计算
+
 ![image](./images/qkv.png)
 
 ```python
@@ -221,6 +224,7 @@ layer norm并不是对每个特征进行归一化，而是对每一个样本进�
 ### Dropout and Droppath
 
 给定一个tensor[0.9，2.8] ，经过 dropout 后，会变成 ，[0.9，0] 或者 ，[0，2.8]，而对于droppath 会直接将这个 tensor 置为 [0，0]。即在ViT的encoder中，输入会在两层的残差网络中被置为0张量，残差块退化，解决过拟合。
+
 ![image](./images/encoder(droppath).png)
 
 ```python
@@ -294,7 +298,9 @@ class VisionTransformer(nn.Module):
 $$
 197\times768 \rightarrow 197\times3012\rightarrow 197\times768
 $$
+
 ![image](./images/model_overview.png)
+
 ### Google 源码
 
 google开源的Vi是基于flax神经网路库开发的，建立在jax上，可以进行优化的科学计算。
